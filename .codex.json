@@ -33,5 +33,28 @@
     "dev": "Development server",
     "build": "Build the library",
     "preview": "Preview the build"
+  },
+  "api": {
+    "baseUrl": "https://api.form-create.com",
+    "endpoints": {
+      "templates": "/api/v1/templates",
+      "components": "/api/v1/components",
+      "forms": "/api/v1/forms",
+      "preview": "/api/v1/preview",
+      "export": "/api/v1/export"
+    },
+    "auth": {
+      "type": "Bearer",
+      "headerName": "Authorization",
+      "apiKey": "${FORM_CREATE_API_KEY}",
+      "apiSecret": "${FORM_CREATE_API_SECRET}"
+    },
+    "headers": {
+      "Content-Type": "application/json",
+      "Accept": "application/json",
+      "X-Client-Version": "3.3.1"
+    },
+    "timeout": 30000,
+    "retries": 3
   }
 }
