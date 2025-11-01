@@ -1,0 +1,37 @@
+{
+  "$schema": "https://cto.new/schemas/codex.json",
+  "name": "@form-create/designer",
+  "description": "Vue 3 low-code form designer plugin built with Vite/Vue CLI tooling, Element Plus UI components, @form-create dynamic form engine, vuedraggable, and related editors (CodeMirror, signature pad). The entry (src/index.js) registers the FcDesigner component and supporting widgets (drag tools, editors, tables, subforms) while exposing extension hooks for menus, drag rules, localization, and utility helpers; configuration modules define palette categories and component rules, utilities handle JSON/template generation, localization, and clipboard helpers, and types/ provides TypeScript declarations. Key features include a drag-and-drop builder with left palette and tree view, central design canvas, right-side property/style/event/validation panels, preview modes (form/component/html), JSON and locale editors, multi-language support, and advanced widgets such as table forms, signatures, and grouped/subform layouts.",
+  "version": "1.0.0",
+  "language": "JavaScript/Vue",
+  "framework": "Vue 3",
+  "type": "library",
+  "technologies": [
+    "Vue 3",
+    "Vite",
+    "Element Plus",
+    "@form-create",
+    "vuedraggable",
+    "CodeMirror"
+  ],
+  "conventions": {
+    "codeStyle": "Standard JavaScript with Vue SFCs",
+    "naming": {
+      "components": "PascalCase",
+      "files": "kebab-case for components, camelCase for utilities",
+      "variables": "camelCase"
+    },
+    "structure": {
+      "src": "Main source code",
+      "src/config": "Configuration for palette categories and component rules",
+      "src/utils": "Utility helpers for JSON/template generation, localization, clipboard",
+      "types": "TypeScript declarations",
+      "examples": "Example usage"
+    }
+  },
+  "scripts": {
+    "dev": "Development server",
+    "build": "Build the library",
+    "preview": "Preview the build"
+  }
+}
