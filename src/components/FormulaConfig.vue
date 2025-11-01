@@ -22,16 +22,15 @@
                                 <el-tree ref="fieldTreeRef" class="_fd-formula-tree" :data="fieldTreeData"
                                     node-key="key" :props="treeProps" :expand-on-click-node="false" highlight-current
                                     default-expand-all :filter-node-method="filterFieldNode"
-                                    @node-click="handleFieldNodeClick" empty-text="暂无已填写的变量">
+                                    @node-click="handleFieldNodeClick" empty-text="暂无可用变量">
                                     <template #default="{ data }">
                                         <div class="_fd-formula-tree-node">
                                             <div class="_fd-formula-field__label">{{ data.label }}</div>
-                                            <div class="_fd-formula-field__meta" v-if="data.children && data.children.length">
-                                                {{ data.field }}
+                                            <div class="_fd-formula-field__meta" v-if="data.displayLabel && data.displayLabel !== data.label">
+                                                {{ data.displayLabel }}
                                             </div>
-                                            <div class="_fd-formula-field__meta" v-else>{{ data.field }}</div>
-                                            <div class="_fd-formula-field__value" v-if="data.rawField && (!data.children || !data.children.length)">
-                                                {{ data.rawField }}
+                                            <div class="_fd-formula-field__value" v-if="!data.children || !data.children.length">
+                                                {{ data.rawField || data.field }}
                                             </div>
                                         </div>
                                     </template>
@@ -174,38 +173,47 @@ export default defineComponent({
             rules.forEach((rule) => {
                 if (!rule || typeof rule !== 'object') return;
 
+                // Skip rules without field (non-input components)
+                if (!rule.field) {
+                    // Still process children for container components
+                    const childRules = Array.isArray(rule.children) ? rule.children : null;
+                    if (childRules) {
+                        const childNodes = parseRequiredFields(childRules, parentIdPath, parentLabelPath);
+                        nodes.push(...childNodes);
+                    }
+                    return;
+                }
+
                 const rawTitle = typeof rule.title === 'string' ? rule.title.trim() : '';
                 const title = rawTitle || rule.field || rule._fc_id || '未命名字段';
                 const idSegment = rule.field || rule._fc_id || title;
                 const currentIdPath = [...parentIdPath, idSegment];
                 const currentLabelPath = [...parentLabelPath, title];
+                const fieldPath = currentIdPath.join('.');
+                const displayPath = currentLabelPath.join('.');
 
-                const childRules = Array.isArray(rule?.props?.rule) ? rule.props.rule
-                    : Array.isArray(rule?.children) ? rule.children
-                        : null;
+                // Check for children in the protocol structure
+                const childRules = Array.isArray(rule.children) ? rule.children : null;
                 const childNodes = childRules ? parseRequiredFields(childRules, currentIdPath, currentLabelPath) : [];
                 const hasChildren = childNodes.length > 0;
-                const isRequired = rule.$required === true;
 
+                const baseNodeInfo = {
+                    key: fieldPath,
+                    field: fieldPath,
+                    rawField: fieldPath,
+                    label: title,
+                    displayLabel: displayPath,
+                };
+
+                // Create node for fields with children (like subforms, table forms)
                 if (hasChildren) {
                     nodes.push({
-                        key: currentIdPath.join('.'),
-                        field: currentLabelPath.join('.'),
-                        rawField: currentIdPath.join('.'),
-                        label: title,
-                        displayLabel: title,
+                        ...baseNodeInfo,
                         children: childNodes,
                     });
-                }
-
-                if (isRequired && !hasChildren) {
-                    nodes.push({
-                        key: currentIdPath.join('.'),
-                        field: currentLabelPath.join('.'),
-                        rawField: currentIdPath.join('.'),
-                        label: title,
-                        displayLabel: currentLabelPath.join('.'),
-                    });
+                } else {
+                    // Add all leaf fields (fields without children)
+                    nodes.push(baseNodeInfo);
                 }
             });
             return nodes;
@@ -270,7 +278,7 @@ export default defineComponent({
 
         const buildHintItems = () => {
             const variableHints = fieldLeafNodes.value.map(item => ({
-                insertText: `{{${item.field}}}`,
+                insertText: `{{${item.rawField || item.field}}}`,
                 label: item.displayLabel || item.label || item.field,
                 desc: item.rawField || item.field,
                 type: 'variable',
@@ -434,8 +442,10 @@ export default defineComponent({
             const hasChildren = Array.isArray(data.children) && data.children.length;
             const nodeHasChildren = node && Array.isArray(node.childNodes) && node.childNodes.length;
             if (hasChildren || nodeHasChildren) return;
-            insertText(`{{${data.field}}}`);
+            const insertField = data.rawField || data.field;
+            insertText(`{{${insertField}}}`);
         };
+
 
         const handleFunctionNodeClick = (data) => {
             if (data && (!Array.isArray(data.children) || data.children.length === 0)) {
