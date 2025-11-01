@@ -1,0 +1,26 @@
+# Node.js
+node_modules/
+
+# Build outputs
+dist/
+locale/
+*.log
+npm-debug.log*
+yarn-error.log*
+
+# Package locks
+package-lock.json
+yarn.lock
+
+# Editor directories and files
+.vscode/
+.idea/
+.DS_Store
+
+# Environment and credential files
+.env
+.env.*
+auth.json
+
+# Miscellaneous
+*.local
